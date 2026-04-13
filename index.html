@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Púlpito — Esboços de Pregação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ════════════════════════════════════════════════
+       VARIÁVEIS & TEMA
+    ════════════════════════════════════════════════ */
+    :root {
+      --bg:           #f4ede0;
+      --bg2:          #ede4d3;
+      --surface:      #fdf8f0;
+      --surface2:     #f9f2e4;
+      --border:       #d8c9b0;
+      --border-soft:  #e8dece;
+      --text:         #1a1208;
+      --text-mid:     #4a3f30;
+      --text-muted:   #8a7a65;
+      --accent:       #7c3520;
+      --accent2:      #a04428;
+      --gold:         #b8923a;
+      --gold-light:   #d4ac5a;
+      --shadow-sm:    0 2px 8px rgba(0,0,0,.07);
+      --shadow-md:    0 6px 24px rgba(0,0,0,.11);
+      --shadow-lg:    0 12px 40px rgba(0,0,0,.15);
+      --r:            14px;
+      --t:            .3s ease;
+
+      --expositiva:   #7c3520;
+      --tematica:     #2a4a72;
+      --textual:      #3a6645;
+    }
+
+    [data-theme="dark"] {
+      --bg:           #100d06;
+      --bg2:          #181208;
+      --surface:      #1c1710;
+      --surface2:     #221c12;
+      --border:       #352c1c;
+      --border-soft:  #2a2214;
+      --text:         #f0e8d5;
+      --text-mid:     #c8b898;
+      --text-muted:   #7a6a52;
+      --accent:       #c05535;
+      --accent2:      #d46040;
+      --gold:         #c8a04a;
+      --gold-light:   #dab86a;
+      --shadow-sm:    0 2px 8px rgba(0,0,0,.3);
+      --shadow-md:    0 6px 24px rgba(0,0,0,.45);
+      --shadow-lg:    0 12px 40px rgba(0,0,0,.6);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh;
+      transition: background var(--t), color var(--t);
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: var(--shadow-sm);
+    }
+    .logo { display: flex; flex-direction: column; line-height: 1.1; cursor: pointer; }
+    .logo-mark { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+    .logo-mark::before { content: '✦ '; color: var(--gold); font-size: .9rem; }
+    .logo-sub { font-size: .65rem; letter-spacing: .2em; text-transform: uppercase; color: var(--text-muted); }
+
+    .header-right { display: flex; gap: .5rem; align-items: center; }
+    .breadcrumb { display: flex; align-items: center; gap: .5rem; font-size: .78rem; color: var(--text-muted); }
+    .breadcrumb span { color: var(--text-mid); font-weight: 500; }
+    .breadcrumb .sep { opacity: .4; }
+
+    .btn-icon { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 50%; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--text); transition: border-color var(--t); }
+    .btn-icon:hover { border-color: var(--accent); }
+
+    /* ── BOTÕES ── */
+    .btn { display: inline-flex; align-items: center; gap: .45rem; padding: .6rem 1.2rem; border: 1.5px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font-family: 'Lora', serif; font-size: .88rem; cursor: pointer; transition: all var(--t); white-space: nowrap; }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+    .btn-sm { padding: .4rem .85rem; font-size: .8rem; }
+    .btn-ghost { border-color: transparent; }
+    .btn-ghost:hover { border-color: var(--border); }
+
+    /* ── VIEWS ── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ════════════════════════════════════════════════
+       DASHBOARD
+    ════════════════════════════════════════════════ */
+    #view-dashboard { padding: 2rem 1.5rem; max-width: 900px; margin: 0 auto; }
+
+    .dash-hero { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap; }
+    .dash-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 700; }
+    .dash-hero h1 em { color: var(--accent); font-style: italic; }
+
+    .filter-bar { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .filter-chip { padding: .35rem .9rem; border: 1.5px solid var(--border); border-radius: 20px; background: transparent; color: var(--text-muted); font-family: 'Lora', serif; font-size: .8rem; cursor: pointer; transition: all .2s; }
+    .filter-chip:hover, .filter-chip.active { border-color: var(--accent); color: var(--accent); background: var(--surface2); }
+    .filter-chip[data-type="expositiva"].active { border-color: var(--expositiva); color: var(--expositiva); }
+    .filter-chip[data-type="tematica"].active   { border-color: var(--tematica);   color: var(--tematica); }
+    .filter-chip[data-type="textual"].active    { border-color: var(--textual);    color: var(--textual); }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+
+    .sermon-card { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--r); padding: 1.3rem 1.4rem; cursor: pointer; transition: box-shadow var(--t), border-color var(--t), transform .2s; position: relative; overflow: hidden; }
+    .sermon-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: var(--r) 0 0 var(--r); }
+    .sermon-card[data-type="expositiva"]::before { background: var(--expositiva); }
+    .sermon-card[data-type="tematica"]::before   { background: var(--tematica); }
+    .sermon-card[data-type="textual"]::before    { background: var(--textual); }
+    .sermon-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+    .card-type-badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; margin-bottom: .6rem; padding: .2rem .55rem; border-radius: 4px; }
+    [data-type="expositiva"] .card-type-badge { color: var(--expositiva); background: color-mix(in srgb, var(--expositiva) 10%, transparent); }
+    [data-type="tematica"]   .card-type-badge { color: var(--tematica);   background: color-mix(in srgb, var(--tematica) 10%, transparent); }
+    [data-type="textual"]    .card-type-badge { color: var(--textual);    background: color-mix(in srgb, var(--textual) 10%, transparent); }
+
+    .card-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; margin-bottom: .25rem; line-height: 1.3; }
+    .card-ref { font-size: .82rem; color: var(--text-muted); font-style: italic; margin-bottom: .8rem; }
+    .card-preview { font-size: .82rem; color: var(--text-mid); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: .9rem; padding-top: .7rem; border-top: 1px solid var(--border-soft); }
+    .card-date { font-size: .72rem; color: var(--text-muted); }
+    .card-actions { display: flex; gap: .3rem; }
+    .card-btn { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: none; cursor: pointer; font-size: .8rem; color: var(--text-muted); transition: all .2s; }
+    .card-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .card-btn.del:hover { border-color: #c0392b; color: #c0392b; }
+
+    .empty-state { grid-column: 1/-1; text-align: center; padding: 4rem 1rem; color: var(--text-muted); font-style: italic; }
+    .empty-state p { font-size: 1.05rem; margin-top: .5rem; }
+    .empty-icon { font-size: 2.5rem; display: block; margin-bottom: .5rem; }
+
+    /* ════════════════════════════════════════════════
+       SELEÇÃO DE TIPO
+    ════════════════════════════════════════════════ */
+    #view-tipo { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+    .tipo-header { text-align: center; margin-bottom: 2.5rem; }
+    .tipo-header h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.4rem, 4vw, 2rem); margin-bottom: .5rem; }
+    .tipo-header p { color: var(--text-muted); font-size: .95rem; max-width: 50ch; margin: 0 auto; }
+
+    .tipos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
+
+    .tipo-card { background: var(--surface); border: 2px solid var(--border-soft); border-radius: var(--r); padding: 2rem 1.6rem; cursor: pointer; transition: all .25s; text-align: left; position: relative; overflow: hidden; }
+    .tipo-card::after { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .25s; }
+    .tipo-card[data-tipo="expositiva"]::after { background: radial-gradient(circle at top left, color-mix(in srgb, var(--expositiva) 8%, transparent), transparent 70%); }
+    .tipo-card[data-tipo="tematica"]::after   { background: radial-gradient(circle at top left, color-mix(in srgb, var(--tematica) 8%, transparent), transparent 70%); }
+    .tipo-card[data-tipo="textual"]::after    { background: radial-gradient(circle at top left, color-mix(in srgb, var(--textual) 8%, transparent), transparent 70%); }
+    .tipo-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .tipo-card:hover::after { opacity: 1; }
+    .tipo-card[data-tipo="expositiva"]:hover { border-color: var(--expositiva); }
+    .tipo-card[data-tipo="tematica"]:hover   { border-color: var(--tematica); }
+    .tipo-card[data-tipo="textual"]:hover    { border-color: var(--textual); }
+
+    .tipo-icon { font-size: 2rem; display: block; margin-bottom: 1rem; }
+    .tipo-nome { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: .4rem; }
+    .tipo-card[data-tipo="expositiva"] .tipo-nome { color: var(--expositiva); }
+    .tipo-card[data-tipo="tematica"]   .tipo-nome { color: var(--tematica); }
+    .tipo-card[data-tipo="textual"]    .tipo-nome { color: var(--textual); }
+
+    .tipo-desc { font-size: .88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.2rem; }
+    .tipo-tags { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .tipo-tag { font-size: .7rem; padding: .2rem .55rem; border-radius: 4px; font-weight: 500; letter-spacing: .05em; }
+    .tipo-card[data-tipo="expositiva"] .tipo-tag { background: color-mix(in srgb, var(--expositiva) 12%, transparent); color: var(--expositiva); }
+    .tipo-card[data-tipo="tematica"]   .tipo-tag { background: color-mix(in srgb, var(--tematica) 12%, transparent);   color: var(--tematica); }
+    .tipo-card[data-tipo="textual"]    .tipo-tag { background: color-mix(in srgb, var(--textual) 12%, transparent);    color: var(--textual); }
+
+    .tipo-arrow { position: absolute; bottom: 1.4rem; right: 1.4rem; font-size: 1.1rem; opacity: 0; transition: opacity .2s, transform .2s; }
+    .tipo-card:hover .tipo-arrow { opacity: 1; transform: translate(3px, -3px); }
+
+    /* ════════════════════════════════════════════════
+       EDITOR
+    ════════════════════════════════════════════════ */
+    #view-editor { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    .editor-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.8rem; flex-wrap: wrap; }
+    .tipo-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .9rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: .08em; }
+    .tipo-pill[data-tipo="expositiva"] { background: color-mix(in srgb, var(--expositiva) 12%, transparent); color: var(--expositiva); border: 1px solid color-mix(in srgb, var(--expositiva) 25%, transparent); }
+    .tipo-pill[data-tipo="tematica"]   { background: color-mix(in srgb, var(--tematica) 12%, transparent);   color: var(--tematica);   border: 1px solid color-mix(in srgb, var(--tematica) 25%, transparent); }
+    .tipo-pill[data-tipo="textual"]    { background: color-mix(in srgb, var(--textual) 12%, transparent);    color: var(--textual);    border: 1px solid color-mix(in srgb, var(--textual) 25%, transparent); }
+    .editor-hint { font-size: .82rem; color: var(--text-muted); font-style: italic; }
+
+    .editor-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow-md); overflow: hidden; }
+
+    .editor-section { padding: 1.6rem 2rem; border-bottom: 1px solid var(--border-soft); }
+    .editor-section:last-child { border-bottom: none; }
+
+    .section-label { display: flex; align-items: center; gap: .5rem; font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 1rem; }
+    .section-label::before { content: ''; width: 20px; height: 2px; background: var(--gold); border-radius: 1px; }
+
+    .fields-row { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+    .field-group { display: flex; flex-direction: column; }
+
+    label.field-lbl { font-size: .72rem; letter-spacing: .15em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: .4rem; }
+
+    input[type="text"], select, textarea {
+      width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px;
+      padding: .7rem 1rem; font-family: 'Lora', serif; font-size: .95rem; color: var(--text);
+      outline: none; resize: none;
+      transition: border-color var(--t), box-shadow var(--t);
+    }
+    select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right .9rem center; padding-right: 2.2rem; }
+    input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
+    input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: .5; }
+
+    .block-list { display: flex; flex-direction: column; gap: .8rem; }
+
+    .sermon-block { background: var(--surface2); border: 1px solid var(--border-soft); border-radius: 10px; padding: 1.1rem 1.2rem; }
+    .sermon-block-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .7rem; }
+    .block-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+    [data-tipo-editor="expositiva"] .block-num { background: var(--expositiva); }
+    [data-tipo-editor="tematica"]   .block-num { background: var(--tematica); }
+    [data-tipo-editor="textual"]    .block-num { background: var(--textual); }
+
+    .block-remove { width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 6px; background: none; cursor: pointer; font-size: .8rem; color: var(--text-muted); transition: all .2s; }
+    .block-remove:hover { border-color: #c0392b; color: #c0392b; }
+
+    .block-textarea { min-height: 90px; font-size: .92rem; line-height: 1.7; margin-top: .5rem; }
+    .block-input { height: 40px; }
+
+    .add-block-btn { display: flex; align-items: center; gap: .5rem; width: 100%; padding: .7rem 1rem; border: 1.5px dashed var(--border); border-radius: 10px; background: transparent; color: var(--text-muted); font-family: 'Lora', serif; font-size: .85rem; cursor: pointer; transition: all .2s; justify-content: center; }
+    .add-block-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--surface2); }
+
+    .free-textarea { min-height: 110px; line-height: 1.8; }
+
+    .editor-actions-bar { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; padding: 1.2rem 2rem; background: var(--surface2); border-top: 1px solid var(--border); }
+    .save-status { margin-left: auto; font-size: .78rem; color: var(--text-muted); font-style: italic; opacity: 0; transition: opacity .4s; display: flex; align-items: center; gap: .3rem; }
+    .save-status.visible { opacity: 1; }
+    .save-status.visible::before { content: '✓'; color: #5a9e6f; font-style: normal; }
+
+    /* ════════════════════════════════════════════════
+       MODO PÚLPITO
+    ════════════════════════════════════════════════ */
+    #pulpit { display: none; background: #0e0a04; color: #f0e8d0; min-height: 100vh; padding: 2.5rem 1.5rem 6rem; animation: fadeUp .4s ease; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .pulpit-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(184,146,58,.25); gap: 1rem; flex-wrap: wrap; }
+    #p-tipo { font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: #b8923a; font-weight: 600; margin-bottom: .4rem; }
+    #p-title { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 5vw, 3rem); line-height: 1.15; color: #f0e8d0; max-width: 20ch; }
+    #p-ref { font-size: 1.1rem; color: #c8a04a; font-style: italic; margin-top: .4rem; }
+
+    .pulpit-font-ctrls { display: flex; gap: .4rem; }
+    .pulpit-font-ctrls button { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); color: #f0e8d0; border-radius: 6px; padding: .3rem .7rem; cursor: pointer; font-size: .85rem; transition: background .2s; }
+    .pulpit-font-ctrls button:hover { background: rgba(255,255,255,.18); }
+
+    #p-body { max-width: 72ch; }
+    .p-section { margin-bottom: 2.5rem; }
+    .p-section-title { font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: rgba(200,160,74,.7); margin-bottom: 1rem; padding-bottom: .5rem; border-bottom: 1px solid rgba(200,160,74,.15); }
+    .p-free-text { font-size: var(--p-font, 1.5rem); line-height: 1.9; font-weight: 300; white-space: pre-wrap; color: #f0e8d0; }
+    .p-point { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: flex-start; }
+    .p-point-num { min-width: 32px; height: 32px; border-radius: 50%; background: #b8923a; display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; color: #0e0a04; flex-shrink: 0; margin-top: .25rem; }
+    .p-point-text { font-size: var(--p-font, 1.5rem); line-height: 1.85; font-weight: 300; color: #f0e8d0; }
+    .p-point-sub { font-size: calc(var(--p-font, 1.5rem) * .7); color: rgba(240,232,208,.55); font-style: italic; margin-top: .3rem; }
+
+    .pulpit-close { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--accent); color: #fff; border: none; border-radius: 50px; padding: .75rem 1.5rem; font-family: 'Lora', serif; font-size: .9rem; font-weight: 600; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.5); transition: transform .2s, background .2s; z-index: 300; }
+    .pulpit-close:hover { transform: scale(1.04); background: var(--accent2); }
+
+    /* ── RESPONSIVO ── */
+    @media (max-width: 640px) {
+      header { padding: .8rem 1rem; }
+      .breadcrumb { display: none; }
+      #view-tipo, #view-editor, #view-dashboard { padding: 1.2rem 1rem; }
+      .fields-row { grid-template-columns: 1fr; }
+      .editor-section { padding: 1.2rem 1rem; }
+      .editor-actions-bar { padding: 1rem; gap: .5rem; }
+      .save-status { margin-left: 0; }
+      .tipos-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header id="main-header">
+  <div class="logo" id="logo-home">
+    <span class="logo-mark">Púlpito</span>
+    <span class="logo-sub">Esboços de Pregação</span>
+  </div>
+  <nav class="breadcrumb" id="breadcrumb" style="display:none">
+    <span id="bc-dash" style="cursor:pointer">Início</span>
+    <span class="sep">›</span>
+    <span id="bc-step2"></span>
+  </nav>
+  <div class="header-right">
+    <button class="btn btn-sm btn-ghost" id="btn-novo-header" style="display:none">+ Novo</button>
+    <button class="btn-icon" id="btn-tema" title="Alternar tema">🌙</button>
+  </div>
+</header>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div class="view active" id="view-dashboard">
+  <div style="max-width:900px;margin:0 auto;padding:2rem 1.5rem">
+    <div class="dash-hero">
+      <h1>Seus <em>Esboços</em></h1>
+      <button class="btn btn-primary" id="btn-novo-dash">✦ Novo Esboço</button>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-chip active" data-type="todos">Todos</button>
+      <button class="filter-chip" data-type="expositiva">📖 Expositiva</button>
+      <button class="filter-chip" data-type="tematica">🎯 Temática</button>
+      <button class="filter-chip" data-type="textual">📝 Textual</button>
+    </div>
+    <div class="cards-grid" id="cards-grid"></div>
+  </div>
+</div>
+
+<!-- ══════════ SELEÇÃO DE TIPO ══════════ -->
+<div class="view" id="view-tipo">
+  <div style="max-width:860px;margin:0 auto;padding:2.5rem 1.5rem">
+    <div class="tipo-header">
+      <h2>Qual tipo de pregação?</h2>
+      <p>Cada modalidade possui uma estrutura própria. Escolha o tipo para organizar seu esboço da melhor forma.</p>
+    </div>
+    <div class="tipos-grid">
+
+      <div class="tipo-card" data-tipo="expositiva">
+        <span class="tipo-icon">📖</span>
+        <div class="tipo-nome">Expositiva</div>
+        <p class="tipo-desc">O pregador percorre um texto bíblico de forma contínua, extraindo e explicando as verdades na ordem em que aparecem. O texto manda na estrutura.</p>
+        <div class="tipo-tags">
+          <span class="tipo-tag">Passagem contínua</span>
+          <span class="tipo-tag">Versículo a versículo</span>
+          <span class="tipo-tag">Contexto histórico</span>
+        </div>
+        <span class="tipo-arrow">↗</span>
+      </div>
+
+      <div class="tipo-card" data-tipo="tematica">
+        <span class="tipo-icon">🎯</span>
+        <div class="tipo-nome">Temática</div>
+        <p class="tipo-desc">Parte de um tema ou assunto central, reunindo passagens de diferentes partes da Bíblia para desenvolver e fundamentar a mensagem.</p>
+        <div class="tipo-tags">
+          <span class="tipo-tag">Tema central</span>
+          <span class="tipo-tag">Múltiplas referências</span>
+          <span class="tipo-tag">Tese + argumentos</span>
+        </div>
+        <span class="tipo-arrow">↗</span>
+      </div>
+
+      <div class="tipo-card" data-tipo="textual">
+        <span class="tipo-icon">📝</span>
+        <div class="tipo-nome">Textual</div>
+        <p class="tipo-desc">Baseia-se em um texto bíblico curto (1–3 versículos), extraindo os pontos principais das ideias contidas naquele trecho específico.</p>
+        <div class="tipo-tags">
+          <span class="tipo-tag">1–3 versículos</span>
+          <span class="tipo-tag">Ideias do texto</span>
+          <span class="tipo-tag">Pontos derivados</span>
+        </div>
+        <span class="tipo-arrow">↗</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ EDITOR ══════════ -->
+<div class="view" id="view-editor">
+  <div style="max-width:860px;margin:0 auto;padding:2rem 1.5rem 4rem">
+    <div class="editor-header">
+      <div class="tipo-pill" id="editor-tipo-pill">—</div>
+      <span class="editor-hint" id="editor-hint"></span>
+    </div>
+    <div class="editor-panel" id="editor-panel"></div>
+    <div class="editor-actions-bar">
+      <button class="btn btn-primary" id="btn-salvar">💾 Salvar</button>
+      <button class="btn" id="btn-pulpito">🎙 Modo Púlpito</button>
+      <span class="save-status" id="save-status">Salvo automaticamente</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODO PÚLPITO ══════════ -->
+<div id="pulpit">
+  <div class="pulpit-top">
+    <div>
+      <div id="p-tipo"></div>
+      <h1 id="p-title"></h1>
+      <p id="p-ref"></p>
+    </div>
+    <div class="pulpit-font-ctrls">
+      <button id="pf-menos">A−</button>
+      <button id="pf-mais">A+</button>
+    </div>
+  </div>
+  <div id="p-body"></div>
+  <button class="pulpit-close" id="btn-fechar-pulpito">✕ Sair do Púlpito</button>
+</div>
+
+
+<script>
+/* ══════════════════════════════════════════════════
+   DEFINIÇÃO DOS TIPOS — estrutura adaptada por tipo
+══════════════════════════════════════════════════ */
+const TIPOS = {
+  expositiva: {
+    label: '📖 Expositiva',
+    hint: 'Percorra o texto de forma contínua, versículo a versículo',
+    sections: [
+      {
+        id: 'meta', label: 'Identificação',
+        fields: [
+          { id: 'titulo',   type: 'text',     label: 'Título da Mensagem',       placeholder: 'Ex: O Caminho da Graça',   span: 2 },
+          { id: 'passagem', type: 'text',     label: 'Passagem Base',            placeholder: 'Ex: Romanos 8:1-17' },
+          { id: 'data',     type: 'text',     label: 'Data prevista',            placeholder: 'dd/mm/aaaa' },
+        ]
+      },
+      {
+        id: 'contexto', label: 'Contexto & Introdução',
+        fields: [
+          { id: 'contexto_hist', type: 'textarea', label: 'Contexto histórico-literário', placeholder: 'Quem escreveu? Para quem? Em que situação histórica?', rows: 3 },
+          { id: 'introducao',    type: 'textarea', label: 'Introdução / Gancho',          placeholder: 'Como você vai capturar a atenção do ouvinte?', rows: 3 },
+        ]
+      },
+      {
+        id: 'pontos', label: 'Pontos Exegéticos',
+        type: 'blocks',
+        blockLabel: 'Título do ponto / versículo(s)',
+        subLabel: 'Explicação, aplicação e ilustração',
+        btnLabel: '+ Adicionar ponto'
+      },
+      {
+        id: 'conclusao', label: 'Conclusão & Apelo',
+        fields: [
+          { id: 'conclusao', type: 'textarea', label: 'Conclusão',     placeholder: 'Como amarrar os pontos e fechar a mensagem?', rows: 3 },
+          { id: 'apelo',     type: 'textarea', label: 'Apelo / Chamado', placeholder: 'O que você vai pedir ao ouvinte que faça ou decida?', rows: 2 },
+        ]
+      },
+    ]
+  },
+
+  tematica: {
+    label: '🎯 Temática',
+    hint: 'Desenvolva um tema central com múltiplas referências bíblicas',
+    sections: [
+      {
+        id: 'meta', label: 'Identificação',
+        fields: [
+          { id: 'titulo', type: 'text', label: 'Título / Tema Central',     placeholder: 'Ex: A Fé que Transforma',           span: 2 },
+          { id: 'tese',   type: 'text', label: 'Tese (ideia em uma frase)', placeholder: 'Ex: A fé genuína sempre produz transformação' },
+          { id: 'data',   type: 'text', label: 'Data prevista',             placeholder: 'dd/mm/aaaa' },
+        ]
+      },
+      {
+        id: 'intro', label: 'Introdução',
+        fields: [
+          { id: 'introducao', type: 'textarea', label: 'Introdução / Necessidade que o tema responde', placeholder: 'Qual problema, pergunta ou necessidade este tema responde na vida do ouvinte?', rows: 3 },
+        ]
+      },
+      {
+        id: 'argumentos', label: 'Argumentos & Referências Bíblicas',
+        type: 'blocks',
+        blockLabel: 'Argumento / Subtema',
+        subLabel: 'Referências bíblicas de apoio',
+        btnLabel: '+ Adicionar argumento'
+      },
+      {
+        id: 'ilustracoes', label: 'Ilustrações & Exemplos',
+        fields: [
+          { id: 'ilustracoes', type: 'textarea', label: 'Histórias, ilustrações ou exemplos práticos', placeholder: 'Adicione aqui as ilustrações que vão tornar o tema vivo e compreensível...', rows: 4 },
+        ]
+      },
+      {
+        id: 'conclusao', label: 'Conclusão',
+        fields: [
+          { id: 'conclusao', type: 'textarea', label: 'Conclusão & Aplicação prática', placeholder: 'Qual a decisão prática que o ouvinte deve tomar com base neste tema?', rows: 3 },
+        ]
+      },
+    ]
+  },
+
+  textual: {
+    label: '📝 Textual',
+    hint: 'Extraia os pontos das ideias contidas no texto base',
+    sections: [
+      {
+        id: 'meta', label: 'Identificação',
+        fields: [
+          { id: 'titulo', type: 'text', label: 'Título',                        placeholder: 'Ex: Criados para Boas Obras', span: 2 },
+          { id: 'texto',  type: 'text', label: 'Texto Base (1–3 versículos)',   placeholder: 'Ex: Efésios 2:10' },
+          { id: 'data',   type: 'text', label: 'Data prevista',                 placeholder: 'dd/mm/aaaa' },
+        ]
+      },
+      {
+        id: 'leitura', label: 'Texto & Explicação',
+        fields: [
+          { id: 'texto_literal', type: 'textarea', label: 'Cole o texto bíblico aqui', placeholder: 'Cole o versículo(s) base para ter à vista durante a pregação...', rows: 3 },
+          { id: 'explicacao',    type: 'textarea', label: 'Explicação geral do texto', placeholder: 'O que este texto está dizendo em seu contexto original?', rows: 3 },
+        ]
+      },
+      {
+        id: 'pontos', label: 'Pontos Derivados do Texto',
+        type: 'blocks',
+        blockLabel: 'Ideia / Ponto extraído do texto',
+        subLabel: 'Desenvolvimento, aplicação e ilustração',
+        btnLabel: '+ Adicionar ponto'
+      },
+      {
+        id: 'conclusao', label: 'Conclusão',
+        fields: [
+          { id: 'conclusao', type: 'textarea', label: 'Conclusão & Chamado', placeholder: 'Retome o texto e faça o chamado final ao ouvinte...', rows: 3 },
+        ]
+      },
+    ]
+  }
+};
+
+/* ══════════════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════════════ */
+let currentView  = 'dashboard';
+let currentTipo  = null;
+let currentId    = null;
+let fontePulpito = parseFloat(localStorage.getItem('p_font')) || 1.5;
+let autoSaveTimer;
+
+const LS_LIST  = 'pulpito_v2_list';
+const LS_DRAFT = 'pulpito_v2_draft';
+
+const getList  = ()  => { try { return JSON.parse(localStorage.getItem(LS_LIST))  || []; } catch(e){ return []; } };
+const saveList = (l) => localStorage.setItem(LS_LIST, JSON.stringify(l));
+const getDraft = ()  => { try { return JSON.parse(localStorage.getItem(LS_DRAFT)) || null; } catch(e){ return null; } };
+const saveDraft= (d) => localStorage.setItem(LS_DRAFT, JSON.stringify(d));
+const clearDraft=()  => localStorage.removeItem(LS_DRAFT);
+
+/* ══════════════════════════════════════════════════
+   NAVEGAÇÃO
+══════════════════════════════════════════════════ */
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  currentView = name;
+
+  const bc     = document.getElementById('breadcrumb');
+  const btnNH  = document.getElementById('btn-novo-header');
+
+  if (name === 'dashboard') {
+    bc.style.display = 'none';
+    btnNH.style.display = 'none';
+    renderDashboard();
+  } else if (name === 'tipo') {
+    bc.style.display = 'flex';
+    btnNH.style.display = 'none';
+    document.getElementById('bc-step2').textContent = 'Tipo de Pregação';
+  } else if (name === 'editor') {
+    bc.style.display = 'flex';
+    btnNH.style.display = 'inline-flex';
+    document.getElementById('bc-step2').textContent = TIPOS[currentTipo]?.label || 'Editor';
+  }
+  window.scrollTo(0, 0);
+}
+
+/* ══════════════════════════════════════════════════
+   TEMA
+══════════════════════════════════════════════════ */
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('btn-tema').textContent = t === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('pulpito_theme', t);
+}
+const savedTheme = localStorage.getItem('pulpito_theme')
+  || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+setTheme(savedTheme);
+document.getElementById('btn-tema').addEventListener('click', () =>
+  setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+);
+
+/* ══════════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════════ */
+let activeFilter = 'todos';
+
+function renderDashboard() {
+  const grid = document.getElementById('cards-grid');
+  let list = getList();
+  if (activeFilter !== 'todos') list = list.filter(e => e.tipo === activeFilter);
+  grid.innerHTML = '';
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state">
+      <span class="empty-icon">✦</span>
+      <strong>Nenhum esboço${activeFilter !== 'todos' ? ' deste tipo' : ''} ainda</strong>
+      <p>Clique em "Novo Esboço" para começar.</p>
+    </div>`;
+    return;
+  }
+
+  list.forEach(esb => {
+    const card = document.createElement('div');
+    card.className = 'sermon-card';
+    card.setAttribute('data-type', esb.tipo);
+    card.innerHTML = `
+      <div class="card-type-badge">${TIPOS[esb.tipo]?.label || esb.tipo}</div>
+      <div class="card-title">${esb.titulo || '(Sem título)'}</div>
+      <div class="card-ref">${esb.ref || ''}</div>
+      ${esb.resumo ? `<div class="card-preview">${esb.resumo}</div>` : ''}
+      <div class="card-footer">
+        <span class="card-date">${esb.data || ''}</span>
+        <div class="card-actions">
+          <button class="card-btn" data-action="pulpito" title="Modo Púlpito">🎙</button>
+          <button class="card-btn del" data-action="del" title="Excluir">🗑</button>
+        </div>
+      </div>`;
+
+    card.addEventListener('click', e => {
+      if (e.target.closest('.card-btn')) return;
+      loadEsboco(esb.id);
+    });
+    card.querySelectorAll('.card-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (btn.dataset.action === 'del')     deleteEsboco(esb.id);
+        if (btn.dataset.action === 'pulpito') openPulpitoById(esb.id);
+      });
+    });
+    grid.appendChild(card);
+  });
+}
+
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFilter = chip.dataset.type;
+    renderDashboard();
+  });
+});
+
+/* ══════════════════════════════════════════════════
+   SELEÇÃO DE TIPO
+══════════════════════════════════════════════════ */
+document.querySelectorAll('.tipo-card').forEach(card => {
+  card.addEventListener('click', () => {
+    currentTipo = card.dataset.tipo;
+    currentId   = null;
+    buildEditor(currentTipo, null);
+    showView('editor');
+  });
+});
+
+/* ══════════════════════════════════════════════════
+   CONSTRUÇÃO DINÂMICA DO EDITOR
+══════════════════════════════════════════════════ */
+function buildEditor(tipo, data) {
+  const def   = TIPOS[tipo];
+  const panel = document.getElementById('editor-panel');
+  panel.setAttribute('data-tipo-editor', tipo);
+  panel.innerHTML = '';
+
+  const pill = document.getElementById('editor-tipo-pill');
+  pill.textContent = def.label;
+  pill.setAttribute('data-tipo', tipo);
+  document.getElementById('editor-hint').textContent = def.hint;
+
+  def.sections.forEach(sec => {
+    const wrap = document.createElement('div');
+    wrap.className = 'editor-section';
+    wrap.id = 'sec-' + sec.id;
+
+    const lbl = document.createElement('div');
+    lbl.className = 'section-label';
+    lbl.textContent = sec.label;
+    wrap.appendChild(lbl);
+
+    if (sec.type === 'blocks') {
+      const list = document.createElement('div');
+      list.className = 'block-list';
+      list.id = 'bl-' + sec.id;
+      wrap.appendChild(list);
+
+      const saved = data?.[sec.id] || [{ text: '', sub: '' }];
+      saved.forEach((b, i) => addBlock(list, sec, i + 1, b));
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-block-btn';
+      addBtn.textContent = sec.btnLabel;
+      addBtn.addEventListener('click', () => {
+        addBlock(list, sec, list.querySelectorAll('.sermon-block').length + 1, { text: '', sub: '' });
+      });
+      wrap.appendChild(addBtn);
+    } else {
+      // descobre se há 2 campos side-by-side (sem span)
+      const noSpan = sec.fields.filter(f => !f.span);
+      const use2col = noSpan.length >= 2;
+
+      const fieldsWrap = document.createElement('div');
+      if (use2col) fieldsWrap.className = 'fields-row';
+
+      sec.fields.forEach(f => {
+        const fg = document.createElement('div');
+        fg.className = 'field-group';
+        if (f.span) fg.style.gridColumn = `span ${f.span}`;
+
+        const lbl2 = document.createElement('label');
+        lbl2.className = 'field-lbl';
+        lbl2.setAttribute('for', 'f-' + f.id);
+        lbl2.textContent = f.label;
+        fg.appendChild(lbl2);
+
+        let el;
+        if (f.type === 'textarea') {
+          el = document.createElement('textarea');
+          el.className = 'free-textarea';
+          el.rows = f.rows || 4;
+          el.placeholder = f.placeholder || '';
+        } else {
+          el = document.createElement('input');
+          el.type = 'text';
+          el.placeholder = f.placeholder || '';
+        }
+        el.id = 'f-' + f.id;
+        el.value = data?.[f.id] || '';
+        el.addEventListener('input', onAnyInput);
+        fg.appendChild(el);
+        fieldsWrap.appendChild(fg);
+      });
+      wrap.appendChild(fieldsWrap);
+    }
+    panel.appendChild(wrap);
+  });
+}
+
+function addBlock(list, sec, num, data) {
+  const block = document.createElement('div');
+  block.className = 'sermon-block';
+  block.innerHTML = `
+    <div class="sermon-block-header">
+      <div class="block-num">${num}</div>
+      <button class="block-remove" title="Remover bloco">✕</button>
+    </div>
+    <input type="text" class="block-input" placeholder="${sec.blockLabel}..." value="${(data.text||'').replace(/"/g,'&quot;')}" />
+    <textarea class="block-textarea" placeholder="${sec.subLabel}..." rows="3">${data.sub||''}</textarea>`;
+
+  block.querySelector('.block-remove').addEventListener('click', () => {
+    block.remove();
+    renumberBlocks(list);
+    onAnyInput();
+  });
+  block.querySelector('input').addEventListener('input', onAnyInput);
+  block.querySelector('textarea').addEventListener('input', onAnyInput);
+  list.appendChild(block);
+}
+
+function renumberBlocks(list) {
+  list.querySelectorAll('.block-num').forEach((el, i) => el.textContent = i + 1);
+}
+
+/* ══════════════════════════════════════════════════
+   COLETA DE DADOS
+══════════════════════════════════════════════════ */
+function collectEditorData() {
+  const def = TIPOS[currentTipo];
+  const out = { tipo: currentTipo };
+
+  def.sections.forEach(sec => {
+    if (sec.type === 'blocks') {
+      const blocks = [];
+      document.querySelectorAll(`#bl-${sec.id} .sermon-block`).forEach(b => {
+        blocks.push({ text: b.querySelector('input').value, sub: b.querySelector('textarea').value });
+      });
+      out[sec.id] = blocks;
+    } else {
+      sec.fields.forEach(f => {
+        const el = document.getElementById('f-' + f.id);
+        if (el) out[f.id] = el.value;
+      });
+    }
+  });
+
+  out.titulo = out.titulo || '';
+  out.ref    = out.passagem || out.texto || out.tese || '';
+  const intro = out.introducao || out.explicacao || '';
+  out.resumo  = intro.substring(0, 120) + (intro.length > 120 ? '…' : '');
+  out.data    = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  return out;
+}
+
+/* ══════════════════════════════════════════════════
+   AUTO-SAVE
+══════════════════════════════════════════════════ */
+function onAnyInput() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    saveDraft({ id: currentId, tipo: currentTipo, data: collectEditorData() });
+    showSavedStatus();
+  }, 1200);
+}
+
+function showSavedStatus() {
+  const el = document.getElementById('save-status');
+  el.classList.add('visible');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('visible'), 3000);
+}
+
+/* ══════════════════════════════════════════════════
+   SALVAR
+══════════════════════════════════════════════════ */
+document.getElementById('btn-salvar').addEventListener('click', () => {
+  const d = collectEditorData();
+  if (!d.titulo && !d.ref) { alert('Preencha pelo menos o título antes de salvar.'); return; }
+
+  const list = getList();
+  if (currentId) {
+    const idx = list.findIndex(e => e.id === currentId);
+    if (idx !== -1) list[idx] = { ...list[idx], ...d };
+    else list.unshift({ id: currentId, ...d });
+  } else {
+    currentId = 'esb_' + Date.now();
+    list.unshift({ id: currentId, ...d });
+  }
+  saveList(list);
+  clearDraft();
+  showSavedStatus();
+});
+
+/* ══════════════════════════════════════════════════
+   CARREGAR / DELETAR
+══════════════════════════════════════════════════ */
+function loadEsboco(id) {
+  const esb = getList().find(e => e.id === id);
+  if (!esb) return;
+  currentId   = esb.id;
+  currentTipo = esb.tipo;
+  buildEditor(esb.tipo, esb);
+  showView('editor');
+}
+
+function deleteEsboco(id) {
+  if (!confirm('Excluir este esboço definitivamente?')) return;
+  saveList(getList().filter(e => e.id !== id));
+  renderDashboard();
+}
+
+/* ══════════════════════════════════════════════════
+   MODO PÚLPITO
+══════════════════════════════════════════════════ */
+function renderPulpito(d) {
+  const tipo = TIPOS[d.tipo];
+  document.getElementById('p-tipo').textContent  = tipo?.label || d.tipo;
+  document.getElementById('p-title').textContent = d.titulo || '(Sem título)';
+  document.getElementById('p-ref').textContent   = d.passagem || d.texto || d.tese || '';
+
+  const body = document.getElementById('p-body');
+  body.innerHTML = '';
+  body.style.setProperty('--p-font', fontePulpito + 'rem');
+
+  tipo?.sections.forEach(sec => {
+    if (sec.id === 'meta') return;
+
+    const secWrap = document.createElement('div');
+    secWrap.className = 'p-section';
+
+    const secTitle = document.createElement('div');
+    secTitle.className = 'p-section-title';
+    secTitle.textContent = sec.label;
+    secWrap.appendChild(secTitle);
+
+    let hasContent = false;
+
+    if (sec.type === 'blocks') {
+      (d[sec.id] || []).forEach((b, i) => {
+        if (!b.text && !b.sub) return;
+        hasContent = true;
+        const pt = document.createElement('div');
+        pt.className = 'p-point';
+        pt.innerHTML = `<div class="p-point-num">${i+1}</div>
+          <div>
+            <div class="p-point-text">${b.text || ''}</div>
+            ${b.sub ? `<div class="p-point-sub">${b.sub}</div>` : ''}
+          </div>`;
+        secWrap.appendChild(pt);
+      });
+    } else {
+      sec.fields.forEach(f => {
+        const val = d[f.id];
+        if (!val) return;
+        hasContent = true;
+        const el = document.createElement('div');
+        el.className = 'p-free-text';
+        el.textContent = val;
+        secWrap.appendChild(el);
+      });
+    }
+
+    if (hasContent) body.appendChild(secWrap);
+  });
+
+  document.getElementById('pulpit').style.display = 'block';
+  document.getElementById('main-header').style.display = 'none';
+  document.querySelectorAll('.view').forEach(v => v.style.visibility = 'hidden');
+  window.scrollTo(0, 0);
+}
+
+function openPulpito()      { renderPulpito(collectEditorData()); }
+function openPulpitoById(id){ const e = getList().find(x => x.id === id); if (e) renderPulpito(e); }
+
+function closePulpito() {
+  document.getElementById('pulpit').style.display = 'none';
+  document.getElementById('main-header').style.display = '';
+  document.querySelectorAll('.view').forEach(v => v.style.visibility = '');
+}
+
+document.getElementById('btn-pulpito').addEventListener('click', openPulpito);
+document.getElementById('btn-fechar-pulpito').addEventListener('click', closePulpito);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('pulpit').style.display === 'block') closePulpito();
+});
+
+document.getElementById('pf-mais').addEventListener('click', () => {
+  fontePulpito = Math.min(3.2, fontePulpito + .15);
+  document.getElementById('p-body').style.setProperty('--p-font', fontePulpito + 'rem');
+  localStorage.setItem('p_font', fontePulpito);
+});
+document.getElementById('pf-menos').addEventListener('click', () => {
+  fontePulpito = Math.max(1.1, fontePulpito - .15);
+  document.getElementById('p-body').style.setProperty('--p-font', fontePulpito + 'rem');
+  localStorage.setItem('p_font', fontePulpito);
+});
+
+/* ══════════════════════════════════════════════════
+   NAVEGAÇÃO — BOTÕES
+══════════════════════════════════════════════════ */
+document.getElementById('btn-novo-dash').addEventListener('click',    () => showView('tipo'));
+document.getElementById('logo-home').addEventListener('click',         () => showView('dashboard'));
+document.getElementById('bc-dash').addEventListener('click',           () => showView('dashboard'));
+document.getElementById('btn-novo-header').addEventListener('click',  () => {
+  if (confirm('Criar novo esboço? O rascunho atual não salvo será perdido.')) {
+    currentId = null;
+    showView('tipo');
+  }
+});
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+(function init() {
+  const draft = getDraft();
+  if (draft?.tipo && TIPOS[draft.tipo]) {
+    currentId   = draft.id || null;
+    currentTipo = draft.tipo;
+    buildEditor(draft.tipo, draft.data);
+    showView('editor');
+  } else {
+    showView('dashboard');
+  }
+})();
+</script>
+</body>
+</html>
